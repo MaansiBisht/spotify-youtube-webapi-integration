@@ -320,9 +320,9 @@ async function name(inputid) {
 app.get('/:playlisturl', async function (req, res) {
   var inputid = req.params.playlisturl;  // Read input id 
   getMyData(inputid);
-  await sleep(5000);
+  await sleep(3000);
   name(inputid); 
-  await sleep(5000);
+  await sleep(3000);
 
   const youtube = google.youtube({ version: "v3", auth: OAuth2 });
   youtube.playlists.insert({
@@ -375,7 +375,7 @@ app.get('/:playlisturl', async function (req, res) {
                     }   
                      
           })
-          await sleep(8000);  }
+          await sleep(5000);  }
              
           }
         
