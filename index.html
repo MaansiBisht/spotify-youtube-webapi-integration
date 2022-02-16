@@ -1,0 +1,152 @@
+
+<!doctype html>
+<html>
+  <head>
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+    <link rel= "stylesheet" href="./index.css">
+  <!-- =====================================================================================-->	
+	<link rel="icon" type="image/png" href="images/icons/favicon.ico"/>
+  <!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="vendor/bootstrap/css/bootstrap.min.css">
+  <!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="fonts/fontawesome-free-5.15.4-web/css/all.css">
+  <!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="fonts/iconic/css/material-design-iconic-font.min.css">
+  <!--===============================================================================================-->
+  
+    <link rel="stylesheet" type="text/css" href="index.css">
+    <!--===============================================================================================-->
+    <style type="text/css">
+      
+      .text-overflow {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        width: 500px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container flex">      
+    <div class="card flex">
+      <p>CONVERT YOUR SPOTIFY PLAYLIST TO YOUTUBE</p>
+      <div class="img-div flex">
+        <div class="sp-logo flex">
+          <img src="spotify.png"/>
+        </div>
+        <div class="arrow-logo flex">
+        <div class="arrowSliding">
+          <div class="arrow"></div>
+        </div>
+        <div class="arrowSliding delay1">
+          <div class="arrow"></div>
+        </div>
+        <div class="arrowSliding delay2">
+          <div class="arrow"></div>
+        </div>
+        <div class="arrowSliding delay3">
+          <div class="arrow"></div>
+        </div>
+        </div>
+      <div class="yt-logo">
+        <img src="youtube.png"/> 
+    </div>
+    </div>
+    
+      <div class="auth-div flex">
+          <a class="btn btn-outline-dark" id="spotifylogin" onclick="spy()"  href="/spotifyauth" role="button">
+            <i class="fab fa-spotify fa-2x"  style="color:green; margin-bottom:3px; margin-right:5px"></i>
+            Login with Spotify
+          </a>
+         
+          <a class="btn btn-outline-dark" id="youtubelogin" onclick="onyt()" href="/googleauth" role="button">
+            <img width="20px" style="margin-bottom:3px; margin-right:5px" alt="Google sign-in" src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png" />
+            Login with Google
+          </a>
+         
+      </div>
+      <div class="atext flex"> 
+        <h5 id="spotifyloggedin " style="color: rgb(245, 77, 77); padding-top:10px;"></h5>
+        <h5 id="youtubeloggedin " style="color: rgb(245, 77, 77); padding-top:10px;display: none;"></h5>
+        </div>
+      <div class="url-div flex">
+        <form method="get" onsubmit="sub()" >
+          <div class="user-box">
+            <input type="text" name="playlisturl" required="" id="playlisturl" />
+            <label>Enter Playlist Id</label>
+            <h5 id="generated " style="color: rgb(245, 77, 77); padding-top:10px;"ath></h5>
+          </div>
+          <input type="submit"  value='convert' id='submit'/>
+        </form>
+      </div>
+     
+    </div>
+  </div>  
+  </body>
+    
+
+<!--===============================================================================================-->
+	<script src="vendor/jquery/jquery-3.2.1.min.js"></script>
+<!--===============================================================================================-->
+	<script src="vendor/animsition/js/animsition.min.js"></script>
+<!--===============================================================================================-->
+	<script src="vendor/bootstrap/js/popper.js"></script>
+	<script src="vendor/bootstrap/js/bootstrap.min.js"></script>
+    </body>
+</html>
+
+<script>
+  function sub(){
+    var u = document.getElementById('playlisturl').value;    
+    $.ajax({
+      url: u,
+      type: "GET",
+      success:
+      function(response){
+        alert("ok");
+      //document.getElementById('generated').innerHTML = "GENERATED!!!";
+    }
+    });
+    
+  
+  }
+
+    function spy(){
+      function getHashParams() {
+          var hashParams = {};
+          var e, r = /([^&;=]+)=?([^&;]*)/g,
+              q = window.location.hash.substring(1);
+          while ( e = r.exec(q)) {
+             hashParams[e[1]] = decodeURIComponent(e[2]);
+          }
+          return hashParams;
+        }
+        var params = getHashParams();
+        var error = params.error;
+    if (error) {
+          alert('There was an error during the authentication');
+        } 
+        }
+    
+function onyt(){
+  function getHashParams() {
+          var hashParams = {};
+          var e, r = /([^&;=]+)=?([^&;]*)/g,
+              q = window.location.hash.substring(1);
+          while ( e = r.exec(q)) {
+             hashParams[e[1]] = decodeURIComponent(e[2]);
+          }
+          return hashParams;
+        }
+        var params = getHashParams();
+        var error = params.error;
+      if (error) {
+      alert('There was an error during the authentication');
+    }
+
+  }
+</script> 
+
+
+
+   

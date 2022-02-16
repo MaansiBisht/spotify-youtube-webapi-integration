@@ -1,0 +1,305 @@
+
+
+
+/*--------------------------[ FONT ]-----------------------*/
+
+@font-face {
+    font-family: Poppins-Regular;
+    src: url('../fonts/poppins/Poppins-Regular.ttf');
+  }
+
+  @font-face {
+    font-family: Poppins-Medium;
+    src: url('../fonts/poppins/Poppins-Medium.ttf');
+  }
+
+  @font-face {
+    font-family: Poppins-Bold;
+    src: url('../fonts/poppins/Poppins-Bold.ttf');
+  }
+
+  @font-face {
+    font-family: Poppins-SemiBold;
+    src: url('../fonts/poppins/Poppins-SemiBold.ttf');
+  }
+
+  /*---------------------------[ RESTYLE TAG ]---------------*/
+  /* 
+  * {
+      margin: 0px;
+      padding: 0px;
+      box-sizing: border-box;
+  } */
+
+  html{
+    height: 100%;      
+  }
+  body{
+    margin:0;
+    padding:0;
+    background: linear-gradient(#141e30, #243b55);
+  }
+
+  /*---------------------------------------------*/
+  a {
+      font-family: Poppins-Regular;
+      font-size: 14px;
+      line-height: 1.7;
+      color: #666666;
+      margin: 0px;
+      transition: all 0.4s;
+      -webkit-transition: all 0.4s;
+    -o-transition: all 0.4s;
+    -moz-transition: all 0.4s;
+  }
+
+  a:focus {
+      outline: none !important;
+  }
+
+  a:hover {
+      text-decoration: none;
+    color: #333333;
+  }
+
+  /*---------------------------------------------*/
+  h1,h2,h3,h4,h5,h6 {
+      margin: 0px;
+  }
+
+  p {
+      font-family: Poppins-Regular;
+      font-size: 20px;
+      color: #666666;
+      padding-top: 0px;
+      margin: 0px;
+      text-align: center;
+  }
+
+  ul, li {
+      margin: 0px;
+      list-style-type: none;
+  }
+
+  .atext{
+    justify-content: space-between;
+  }
+  /*---------------------------------------------*/
+  input {
+      outline: none;
+      border: none;  }
+
+  button #submit {
+      outline: none !important;
+      border: none;
+      background: transparent;
+  }
+
+  button:hover {
+      cursor: pointer;
+  }
+
+  iframe {
+      border: none !important;
+  }
+  .flex{
+    display: flex;
+}
+
+
+  /*-------------------[ Utility ]-----------------------*/
+  .txt1 {
+    font-family: Poppins-Regular;
+    font-size: 15px;
+    color: #999999;
+    line-height: 1.5;
+  }
+
+  .txt2 {
+    font-family: Poppins-Regular;
+    font-size: 15px;
+    color: #57b846;
+    line-height: 1.5;
+  }
+
+
+/*--------------------- [CARD CSS]--------------------------------*/
+.container{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    height: 669px;
+    width: 900px;
+    padding: 80px;
+    padding-left: 10%;
+    transform: translate(-50%, -50%);
+    background: #0E1221;
+    box-sizing: border-box;
+    box-shadow: 0 15px 25px rgba(0,0,0,.6);
+    border-radius: 10px; 
+    
+}
+.card {
+  position: absolute;
+    background: #0E1221;
+}
+/*----------------------------[CARD CSS END]--------------------*/
+
+/*--------------------------[LOGO] ------------------------------*/
+.img-div{
+    width: 100%;
+    padding-top: 50px;
+    
+}
+
+.sp-logo{
+   
+    background: #0E1221;
+    padding-bottom: 30px;
+    padding-right: 10px;
+}
+.yt-logo{
+   
+    background: #0E1221;
+    align-items: flex-end;
+    padding-left: 10px;
+}
+
+.arrow-logo{
+    background: #0E1221;
+        width: 150px;
+        height: 150px;
+        justify-content: center;
+        padding-top: 100px;
+        align-items: center;
+    }
+/*-------------------------[LOGO END]----------------------*/    
+
+.auth-div {
+    justify-content: space-between;
+    width: 100%;
+}  
+
+/*-----------------------[URL BOX BOX]-------------------------*/
+.url-div{
+    justify-content: center;
+    padding-top: 10px;
+}
+.url-div h2 {
+    margin: 0 0 30px;
+    padding: 0;
+    color: #fff;
+    text-align: center;
+  }
+  
+  .url-div .user-box {
+    position: relative;
+  }
+  
+  .url-div .user-box input {
+    width: 100%;
+    padding: 10px 0;
+    font-size: 16px;
+    color: #fff;
+    margin-bottom: 30px;
+    border: none;
+    border-bottom: 1px solid #fff;
+    outline: none;
+    background: transparent;
+  }
+  .url-div .user-box label {
+    position: absolute;
+    top:0;
+    left: 0;
+    padding: 10px 0;
+    font-size: 16px;
+    color: #03e9f4;
+    pointer-events: none;
+    transition: .5s;
+  }
+  
+  .url-div .user-box input:focus ~ label,
+  .url-div .user-box input:valid ~ label {
+    top: -20px;
+    left: 0;
+    color: #03e9f4;
+    font-size: 12px;
+  }
+  
+  .url-div form #submit {
+    position: relative;
+    display: inline-block;
+    padding: 10px 20px;
+    color: #fff;
+    font-size: 16px;
+    text-decoration: none;
+    text-transform: uppercase;
+    overflow: hidden;
+    transition: .5s;
+    margin-top: 40px;
+    letter-spacing: 4px;
+    background: #0E1221;
+  }
+  
+  .url-div #submit:hover {
+    background: black;
+    color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 0 5px #243b55,
+                0 0 25px #243b55,
+                0 0 50px #243b55,
+                0 0 100px #243b55;
+  }
+  
+  .url-div #submit span {
+    position: absolute;
+    display: block;
+  }
+  
+  
+
+/*----------------------------[URL BOX END]------------------*/
+
+/* ------------------------[ANIMATED ARROW]--------------------*/
+  
+.arrow {
+    width: 4vw;
+    height: 4vw;
+    border: 1vw solid;
+    border-color:rgba(156, 142, 142, 0.767) transparent transparent rgba(156, 142, 142, 0.767) ;
+    transform: rotate(135deg);
+  }
+  
+  
+  .arrowSliding {
+    position: absolute;
+    -webkit-animation: slide 4s linear infinite; 
+            animation: slide 4s linear infinite;
+  }
+  
+  .delay1 {
+    -webkit-animation-delay: 1s; 
+      animation-delay: 1s;
+  }
+  .delay2 {
+    -webkit-animation-delay: 2s; 
+      animation-delay: 2s;
+  }
+  .delay3 {
+    -webkit-animation-delay: 3s; 
+      animation-delay: 3s;
+  }
+  @-webkit-keyframes slide {
+    0% { opaci0ty:0; transform: translateX(-2vw); }	
+   20% { opacity:1; transform: translateX(-5vw); }	
+   80% { opacity:1; transform: translateX(2vw); }	
+  100% { opacity:0; transform: translateX(5vw); }	
+}
+@keyframes slide {
+    0% { opacity:0; transform: translateX(-5vw); }	
+   20% { opacity:1; transform: translateX(-2vw); }	
+   80% { opacity:1; transform: translateX(2vw); }	
+  100% { opacity:0; transform: translateX(5vw); }	
+}
+  /*-------------------------[ANIMATED ARROW END]------------*/
+
