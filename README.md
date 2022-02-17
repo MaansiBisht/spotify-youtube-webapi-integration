@@ -1,5 +1,5 @@
 # Spotify playlists to  Youtube
-## Web-api to convert your spotify playlists to youtube 
+### Web-api to convert your spotify playlists to youtube 
 
 
 
@@ -37,3 +37,12 @@
    
 #### After all the above steps you can run the app.js file 
      node app.js
+    
+## User Interface 
+![image](https://user-images.githubusercontent.com/66878185/154432090-24bff0f3-9f9c-4137-a1d2-0e871dd72401.png)
+
+##### Steps 
+  ##### - Authorize spotify .
+  ##### - Connect your youtube account.
+  ##### - Enter the playlistId you want to convert.
+  ##### - Click on convert and Voila 👏 your youtube playlist is generated!!!
