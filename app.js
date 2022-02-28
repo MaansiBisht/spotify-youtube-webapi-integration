@@ -247,25 +247,25 @@ app.get('/callback1' , (req, res) => {
 //----------------------------GET SPOTIFY PLAYLIST---------------------------//
 
 //GET MY SPOTIFY DATA
-function getMyData(inputid) {
+function getMyData(inputname) {
   (async () => {
       const me = await spotifyApi.getMe();
    //   console.log(me.body);
-       getUserPlaylists(me.body.id , inputid);
+       getUserPlaylists(me.body.id , inputname);
   })().catch(e => {
       console.error(e);
   });
 }
 
 //GET MY  SPOTIFY PLAYLIST
-async function getUserPlaylists(userName, inputid) {
+async function getUserPlaylists(userName, inputname) {
   const data = await spotifyApi.getUserPlaylists(userName)
 
   console.log( "-----------------------------");
   let playlists = [];
   
   for (let playlist of data.body.items){
-      if(playlist.id == inputid){
+      if(playlist.name == inputname){
       console.log(playlist.name + " " + playlist.id);
       
       let tracks  = await getPlayliststracks(playlist.id, playlist.name);
@@ -273,7 +273,7 @@ async function getUserPlaylists(userName, inputid) {
 
       const toJSON =  { tracks }
       let data = JSON.stringify(toJSON);
-      fs.writeFileSync(playlist.id+'.json',data);
+      fs.writeFileSync(playlist.name+'.json',data);
   }
 }
 }
@@ -303,8 +303,8 @@ async function getPlayliststracks(playlistId, playlistName) {
 //...........................Read JSON file ............................//
 
 var namearr = [];
-async function name(inputid) {
-  const content = readJson(`${__dirname}/${inputid}.json`);
+async function name(inputname) {
+  const content = readJson(`${__dirname}/${inputname}.json`);
   for (let i = 0; i <content.tracks.length; i++){
   var namee =   content.tracks[i]["name"];
   var artist = content.tracks[i]["artists"][0]["name"];
@@ -318,11 +318,11 @@ async function name(inputid) {
 //............................Create playlist on youtube................................//
 
 app.get('/:playlisturl', async function (req, res) {
-  var inputid = req.params.playlisturl;  // Read input id 
-  getMyData(inputid);
-  await sleep(3000);
-  name(inputid); 
-  await sleep(3000);
+  var inputname = req.params.playlisturl;  // Read input id 
+  getMyData(inputname);
+  await sleep(5000);
+  name(inputname); 
+  await sleep(5000);
 
   const youtube = google.youtube({ version: "v3", auth: OAuth2 });
   youtube.playlists.insert({
@@ -390,5 +390,4 @@ app.get('/:playlisturl', async function (req, res) {
 
 console.log('Listening on 8888');
 app.listen(8888);
-
 
