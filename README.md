@@ -12,9 +12,9 @@
       
 ####  Dependencies and modules
       sudo npm install spotify-web-api-node --save
-      npm install --save youtube-api
-      npm install googleapis --save
-      npm install google-auth-library --save      
+      sudo npm install --save youtube-api
+      sudo npm install googleapis --save
+      sudo npm install google-auth-library --save      
 
 #### git clone the source code in src folder
       git clone https://github.com/MaansiBisht/spotify-youtube-webapi-integration.git
