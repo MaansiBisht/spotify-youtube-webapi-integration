@@ -1,18 +1,23 @@
 # Spotify playlists to  Youtube
-### Web-api to convert your spotify playlists to youtube 
+### This project uses spotify and googleapis to convert your spotify playlists to youtube playlists. 
 
 
 
 ## Setup and Installation 
 
-#### Install Node and Setup React project using :
+#### Install Node and Initialize package.json using :
+      sudo apt update
+      sudo apt install nodejs
+      sudo npm init
       
-      sudo apt-get install curl
-      curl -sL https://deb.nodesource.com/setup_13.x | sudo -E bash -
-      sudo apt-get install nodejs
-      npx create-react-app your-app
-      
+####  Dependencies and modules
+      sudo npm install spotify-web-api-node --save
+      npm install --save youtube-api
+      npm install googleapis --save
+      npm install google-auth-library --save      
 
+#### git clone the source code in src folder
+      git clone https://github.com/MaansiBisht/spotify-youtube-webapi-integration.git
 #### Spotify Authentication 
 ##### Through the Spotify Web API , external applications retrieve Spotify content such as album data and playlists.
 ###### Register an application with spotify.
@@ -29,20 +34,16 @@
            
 ###### for more refer https://developers.google.com/identity/protocols/oauth2/
 
-#### Install Dependencies and modules
-      sudo npm install spotify-web-api-node --save
-      npm install --save youtube-api
-      npm install googleapis --save
-      npm install google-auth-library --save
    
 #### After all the above steps you can run the app.js file 
      node app.js
     
 ## User Interface 
-![image](https://user-images.githubusercontent.com/66878185/154432090-24bff0f3-9f9c-4137-a1d2-0e871dd72401.png)
+ ![image](https://user-images.githubusercontent.com/66878185/156002876-f3bd0ad8-7fa7-4363-97fe-723a854b8d06.png)
+
 
 ##### Steps 
   ##### - Authorize spotify .
   ##### - Connect your youtube account.
-  ##### - Enter the playlistId you want to convert.
+  ##### - Enter the playlistName you want to convert.
   ##### - Click on convert and Voila 👏 your youtube playlist is generated!!!
