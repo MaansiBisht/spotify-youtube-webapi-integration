@@ -28,10 +28,7 @@
 ###### for more refer https://developer.spotify.com/documentation/web-api/quick-start/
    
 #### Youtube Authentication 
-###### Register your application with youtube and download client-credentials.json file in your directory.
-   
- ![image](https://user-images.githubusercontent.com/66878185/154222079-19732f79-2330-447c-8533-0be6b9e148c5.png)
-           
+###### Register your application with youtube and download client-credentials.json file in your directory.           
 ###### for more refer https://developers.google.com/identity/protocols/oauth2/
 
    
