@@ -1,0 +1,17 @@
+node_modules/
+package-lock.json
+
+# OAuth credentials — keep these OUT of git
+web-credentials.json
+client_secret.json
+*.credentials.json
+
+# Generated playlist exports
+*.json
+!package.json
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+*.log

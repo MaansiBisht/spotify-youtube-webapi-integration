@@ -70,7 +70,7 @@
         <h5 id="youtubeloggedin " style="color: rgb(245, 77, 77); padding-top:10px;display: none;"></h5>
         </div>
       <div class="url-div flex">
-        <form method="get" onsubmit="sub()" >
+        <form method="get" onsubmit="return sub(event)" >
           <div class="user-box">
             <input type="text" name="playlisturl" required="" id="playlisturl" />
             <label>Enter Playlist Name</label>
@@ -96,19 +96,22 @@
 </html>
 
 <script>
-  function sub(){
-    var u = document.getElementById('playlisturl').value;    
+  function sub(event){
+    if (event && event.preventDefault) event.preventDefault();
+    var u = document.getElementById('playlisturl').value;
     $.ajax({
-      url: u,
+      url: '/convert/' + encodeURIComponent(u),
       type: "GET",
-      success:
-      function(response){
-        alert("ok");
-      //document.getElementById('generated').innerHTML = "GENERATED!!!";
-    }
+      success: function(response){
+        document.getElementById('generated').innerHTML =
+          "GENERATED! Added " + response.added + " of " + response.tracksRequested + " tracks.";
+      },
+      error: function(xhr){
+        var msg = (xhr.responseJSON && xhr.responseJSON.error) || xhr.statusText;
+        document.getElementById('generated').innerHTML = "Error: " + msg;
+      }
     });
-    
-  
+    return false;
   }
 
     function spy(){

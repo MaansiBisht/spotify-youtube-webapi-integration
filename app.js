@@ -1,393 +1,290 @@
 // ------------------------IMPORT modules----------------------- //
-var express = require('express'); // Express web server framework
-var request = require('request'); // "Request" library
-var cors = require('cors');
-var querystring = require('querystring');
-var cookieParser = require('cookie-parser');
-var fs = require('fs');
-var {google} = require('googleapis');
-var readJson = require("r-json");  //"JSON" Module
-const SpotifyWebAPi = require('spotify-web-api-node');  //"spotify-web-api-module"
-const spotifyApi = new SpotifyWebAPi();
+const express = require('express');
+const axios = require('axios');
+const cors = require('cors');
+const querystring = require('querystring');
+const cookieParser = require('cookie-parser');
+const fs = require('fs');
+const path = require('path');
+const { google } = require('googleapis');
+const readJson = require('r-json');
+const SpotifyWebApi = require('spotify-web-api-node');
 
-
-
+const spotifyApi = new SpotifyWebApi();
 
 //---------------------------SPOTIFY AUTH-----------------------//
 
-const web_credentials = readJson(`${__dirname}/web-credentials.json`); // Read spotify client credentials
-var client_id = web_credentials.web.client_id; // Your client id
-var client_secret = web_credentials.web.client_secret; // Your secret
-var redirect_uri = web_credentials.web.redirect_uris[0]; // Your redirect uri
+const web_credentials = readJson(`${__dirname}/web-credentials.json`);
+const client_id = web_credentials.web.client_id;
+const client_secret = web_credentials.web.client_secret;
+const redirect_uri = web_credentials.web.redirect_uris[0];
 
-
-/**
- * Generates a random string containing numbers and letters
- * @param  {number} length The length of the string
- * @return {string} The generated string
- */
-
- var generateRandomString = function(length) {
-  var text = '';
-  var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-
-  for (var i = 0; i < length; i++) {
+function generateRandomString(length) {
+  const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let text = '';
+  for (let i = 0; i < length; i++) {
     text += possible.charAt(Math.floor(Math.random() * possible.length));
   }
   return text;
-};
+}
 
-var stateKey = 'spotify_auth_state';
+const stateKey = 'spotify_auth_state';
 
-var app = express(); // Initiate express app
+const app = express();
 
-app.use(express.static(__dirname + '/public'))
+app.use(express.static(path.join(__dirname, 'public')))
    .use(cors())
-   .use(cookieParser())
-  
-   
+   .use(cookieParser());
 
-
-app.get('/spotifyauth', function(req, res) {    //  Spotify Authentication 
-
-  var state = generateRandomString(16);
+app.get('/spotifyauth', function (req, res) {
+  const state = generateRandomString(16);
   res.cookie(stateKey, state);
 
-  // your application requests authorization
-  var scope = 'user-read-private user-read-email';
+  const scope = 'user-read-private user-read-email playlist-read-private playlist-read-collaborative';
   res.redirect('https://accounts.spotify.com/authorize?' +
     querystring.stringify({
       response_type: 'code',
       client_id: client_id,
       scope: scope,
       redirect_uri: redirect_uri,
-      state: state
+      state: state,
     }));
 });
 
-
-app.get('/callback', function(req, res) {
-
-  // your application requests refresh and access tokens
-  // after checking the state parameter
-
-  var code = req.query.code || null;
-  var state = req.query.state || null;
-  var storedState = req.cookies ? req.cookies[stateKey] : null;
+app.get('/callback', async function (req, res) {
+  const code = req.query.code || null;
+  const state = req.query.state || null;
+  const storedState = req.cookies ? req.cookies[stateKey] : null;
 
   if (state === null || state !== storedState) {
-    res.redirect('/#' +
-      querystring.stringify({
-        error: 'state_mismatch'
-      }));
-  } else {
-    res.clearCookie(stateKey);
-    var authOptions = {
-      url: 'https://accounts.spotify.com/api/token',
-      form: {
+    return res.redirect('/#' + querystring.stringify({ error: 'state_mismatch' }));
+  }
+
+  res.clearCookie(stateKey);
+
+  try {
+    const tokenResponse = await axios.post(
+      'https://accounts.spotify.com/api/token',
+      new URLSearchParams({
         code: code,
         redirect_uri: redirect_uri,
-        grant_type: 'authorization_code'
-      },
-      headers: {
-        'Authorization': 'Basic ' + (new Buffer(client_id + ':' + client_secret).toString('base64'))
-      },
-      json: true
-    };
-    console.log(authOptions);
-    request.post(authOptions, function(error, response, body) {
-      if (!error && response.statusCode === 200) {
-
-        var access_token = body.access_token,
-            refresh_token = body.refresh_token;
-        spotifyApi.setAccessToken(access_token);  
-        console.log(access_token);   
-        
-        var options = {
-          url: 'https://api.spotify.com/v1/me',
-          headers: { 'Authorization': 'Bearer ' + access_token },
-          json: true
-        };
-
-        // use the access token to access the Spotify Web API
-        request.get(options, function(error, response, body) {
-          console.log(body);
-        });
-        // we can also pass the token to the browser to make requests from there
-        res.redirect('/#authorized')
-      } else {
-        res.redirect('/#' +
-          querystring.stringify({
-            error: 'invalid_token'
-          }));
+        grant_type: 'authorization_code',
+      }).toString(),
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Authorization': 'Basic ' + Buffer.from(client_id + ':' + client_secret).toString('base64'),
+        },
       }
+    );
+
+    const { access_token, refresh_token } = tokenResponse.data;
+    spotifyApi.setAccessToken(access_token);
+    spotifyApi.setRefreshToken(refresh_token);
+
+    const me = await axios.get('https://api.spotify.com/v1/me', {
+      headers: { 'Authorization': 'Bearer ' + access_token },
     });
+    console.log('Spotify user:', me.data.display_name || me.data.id);
+
+    res.redirect('/#authorized');
+  } catch (error) {
+    console.error('Spotify token exchange failed:', error.response?.data || error.message);
+    res.redirect('/#' + querystring.stringify({ error: 'invalid_token' }));
   }
 });
 
+app.get('/refresh_token', async function (req, res) {
+  const refresh_token = req.query.refresh_token;
 
+  try {
+    const tokenResponse = await axios.post(
+      'https://accounts.spotify.com/api/token',
+      new URLSearchParams({
+        grant_type: 'refresh_token',
+        refresh_token: refresh_token,
+      }).toString(),
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Authorization': 'Basic ' + Buffer.from(client_id + ':' + client_secret).toString('base64'),
+        },
+      }
+    );
 
-app.get('/refresh_token', function(req, res) {
-
-  // requesting access token from refresh token
-  var refresh_token = req.query.refresh_token;
-  var authOptions = {
-    url: 'https://accounts.spotify.com/api/token',
-    headers: { 'Authorization': 'Basic ' + (new Buffer(client_id + ':' + client_secret).toString('base64')) },
-    form: {
-      grant_type: 'refresh_token',
-      refresh_token: refresh_token
-    },
-    json: true
-  };
-
-  request.post(authOptions, function(error, response, body) {
-    if (!error && response.statusCode === 200) {
-      var access_token = body.access_token;
-      res.send({
-        'access_token': access_token
-      });
-    }
-  });
-});  
+    res.send({ access_token: tokenResponse.data.access_token });
+  } catch (error) {
+    console.error('Refresh token failed:', error.response?.data || error.message);
+    res.status(500).send({ error: 'refresh_failed' });
+  }
+});
 //-----------------------END SPOTIFY AUTH--------------------------//
 
 // --------------------------YOUTUBE AUTH--------------------------//
 const credentials = readJson(`${__dirname}/client_secret.json`);
-var SCOPES = 'https://www.googleapis.com/auth/youtube.upload https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/youtube https://www.googleapis.com/auth/youtube.channel-memberships.creator https://www.googleapis.com/auth/youtube.force-ssl https://www.googleapis.com/auth/youtube.readonly';
-var clientSecret = credentials.web.client_secret;
-var clientId = credentials.web.client_id;
-var redirectUrl = credentials.web.redirect_uris[0];
-var OAuth2 = new google.auth.OAuth2(
-  clientId, clientSecret, redirectUrl
-);
+const SCOPES = [
+  'https://www.googleapis.com/auth/youtube',
+  'https://www.googleapis.com/auth/youtube.force-ssl',
+  'https://www.googleapis.com/auth/userinfo.profile',
+].join(' ');
+const clientSecret = credentials.web.client_secret;
+const clientId = credentials.web.client_id;
+const redirectUrl = credentials.web.redirect_uris[0];
+const OAuth2 = new google.auth.OAuth2(clientId, clientSecret, redirectUrl);
 
-OAuth2.generateAuthUrl({
-  access_type: 'offline',
-  scope: SCOPES
-});
-var stateKeyy ='youtube-auth-state';
-app.get('/googleauth', function(req, res) {
-  var state = generateRandomString(16);
+const stateKeyy = 'youtube-auth-state';
+
+app.get('/googleauth', function (req, res) {
+  const state = generateRandomString(16);
   res.cookie(stateKeyy, state);
 
-  // your application requests authorization
-  var scope = SCOPES;
   res.redirect('https://accounts.google.com/o/oauth2/v2/auth?' +
     querystring.stringify({
       response_type: 'code',
-      client_id: credentials.web.client_id,
+      client_id: clientId,
       scope: SCOPES,
-      redirect_uri: credentials.web.redirect_uris[0],
-      state: state
+      redirect_uri: redirectUrl,
+      state: state,
+      access_type: 'offline',
+      prompt: 'consent',
     }));
 });
 
-app.get('/callback1' , (req, res) => {
+app.get('/callback1', async function (req, res) {
+  const code = req.query.code || null;
+  const state = req.query.state || null;
+  const storedState = req.cookies ? req.cookies[stateKeyy] : null;
 
-  var code = req.query.code || null;
-  var state = req.query.state || null;
-  var storedState = req.cookies ? req.cookies[stateKeyy] : null;
-
-  
   if (state === null || state !== storedState) {
-    res.redirect('/')
-  } else {
-    res.clearCookie(stateKey);
-    var authOptions = {
-      url: 'https://oauth2.googleapis.com/token',
-      form: {
+    return res.redirect('/#' + querystring.stringify({ error: 'state_mismatch_google' }));
+  }
+
+  res.clearCookie(stateKeyy);
+
+  try {
+    const tokenResponse = await axios.post(
+      'https://oauth2.googleapis.com/token',
+      new URLSearchParams({
         code: code,
-        redirect_uri: credentials.web.redirect_uris[0],
-        grant_type: 'authorization_code'
-      },
-      headers: {
-        'Authorization': 'Basic ' + (new Buffer(clientId + ':' + clientSecret).toString('base64'))
-      },
-      json: true
-    };
-  }
+        redirect_uri: redirectUrl,
+        grant_type: 'authorization_code',
+        client_id: clientId,
+        client_secret: clientSecret,
+      }).toString(),
+      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+    );
 
- // console.log(authOptions);
- request.post(authOptions, function(error, response, body) {
-  if (!error && response.statusCode === 200) {
+    const { access_token, refresh_token } = tokenResponse.data;
+    OAuth2.setCredentials({ access_token, refresh_token });
 
-    var ytaccess_token = body.access_token,
-        ytrefresh_token = body.refresh_token;
+    const userInfo = await axios.get('https://www.googleapis.com/oauth2/v1/userinfo', {
+      headers: { 'Authorization': 'Bearer ' + access_token },
+    });
+    console.log('YouTube user:', userInfo.data.name || userInfo.data.id);
 
-
-        //console.log(ytaccess_token);
-        OAuth2.setCredentials({
-          access_token: ytaccess_token,
-          refresh_token: ytrefresh_token
-        });
-
-        var options = {
-          url: 'https://www.googleapis.com/oauth2/v1/userinfo',
-          headers: { 'Authorization': 'Bearer ' + ytaccess_token },
-          json: true
-        };
-      
-        // use the access token to access the Spotify Web API
-        request.get(options, function(error, response, body) {
-          console.log(body);
-        });
-    // we can also pass the token to the browser to make requests from there
     res.redirect('/#authorized');
-  } else {
-    res.redirect('/#' +
-      querystring.stringify({
-        error: 'invalid_token'
-      }));
+  } catch (error) {
+    console.error('Google token exchange failed:', error.response?.data || error.message);
+    res.redirect('/#' + querystring.stringify({ error: 'invalid_token' }));
   }
-});
 });
 //----------------------------END YOUTUBE AUTHENTICATION---------------------//
 
 //----------------------------GET SPOTIFY PLAYLIST---------------------------//
 
-//GET MY SPOTIFY DATA
-function getMyData(inputname) {
-  (async () => {
-      const me = await spotifyApi.getMe();
-   //   console.log(me.body);
-       getUserPlaylists(me.body.id , inputname);
-  })().catch(e => {
-      console.error(e);
+async function fetchPlaylistTracks(inputname) {
+  const me = await spotifyApi.getMe();
+  const userId = me.body.id;
+
+  const userPlaylists = await spotifyApi.getUserPlaylists(userId);
+
+  const match = userPlaylists.body.items.find((p) => p.name === inputname);
+  if (!match) {
+    throw new Error(`Playlist "${inputname}" not found for user ${userId}`);
+  }
+
+  const tracksResponse = await spotifyApi.getPlaylistTracks(match.id, {
+    offset: 0,
+    limit: 100,
+    fields: 'items',
   });
+
+  const tracks = tracksResponse.body.items
+    .map((item) => item.track)
+    .filter((track) => track && track.name && track.artists?.length);
+
+  fs.writeFileSync(`${__dirname}/${inputname}.json`, JSON.stringify({ tracks }, null, 2));
+
+  return tracks.map((t) => `${t.name} ${t.artists[0].name}`);
 }
-
-//GET MY  SPOTIFY PLAYLIST
-async function getUserPlaylists(userName, inputname) {
-  const data = await spotifyApi.getUserPlaylists(userName)
-
-  console.log( "-----------------------------");
-  let playlists = [];
-  
-  for (let playlist of data.body.items){
-      if(playlist.name == inputname){
-      console.log(playlist.name + " " + playlist.id);
-      
-      let tracks  = await getPlayliststracks(playlist.id, playlist.name);
-     // console.log(tracks);
-
-      const toJSON =  { tracks }
-      let data = JSON.stringify(toJSON);
-      fs.writeFileSync(playlist.name+'.json',data);
-  }
-}
-}
-
-async function getPlayliststracks(playlistId, playlistName) {
-  const data  = await spotifyApi.getPlaylistTracks(playlistId, {
-      offset :1,
-      limit : 100,
-      fields: 'items'
-  })
-
-  //console.log('The playlist contains these tracks', data.body);
-  let tracks = [];
-
-  for (let track_ob of data.body.items) {
-      const track = track_ob.track
-      tracks.push(track);
-     console.log(track.name + ":" +track.artists[0].name)
-  }
-
-  return tracks;
-}
-
-
-
-
-//...........................Read JSON file ............................//
-
-var namearr = [];
-async function name(inputname) {
-  const content = readJson(`${__dirname}/${inputname}.json`);
-  for (let i = 0; i <content.tracks.length; i++){
-  var namee =   content.tracks[i]["name"];
-  var artist = content.tracks[i]["artists"][0]["name"];
-  var result = namee + artist;
-  namearr.push(result);
-  }
-  return namearr;
-}
-
 
 //............................Create playlist on youtube................................//
 
-app.get('/:playlisturl', async function (req, res) {
-  var inputname = req.params.playlisturl;  // Read input id 
-  getMyData(inputname);
-  await sleep(5000);
-  name(inputname); 
-  await sleep(5000);
+app.get('/convert/:playlisturl', async function (req, res) {
+  const inputname = req.params.playlisturl;
 
-  const youtube = google.youtube({ version: "v3", auth: OAuth2 });
-  youtube.playlists.insert({
-    part: 'id,snippet',
-    resource: {
+  try {
+    const queries = await fetchPlaylistTracks(inputname);
+
+    const youtube = google.youtube({ version: 'v3', auth: OAuth2 });
+
+    const created = await youtube.playlists.insert({
+      part: ['id', 'snippet'],
+      requestBody: {
         snippet: {
-            title: "spotifyPlaylist",
-            description:"Description",
+          title: inputname,
+          description: `Imported from Spotify playlist "${inputname}"`,
+        },
+      },
+    });
+    const playlistId = created.data.id;
+
+    let added = 0;
+    let failed = 0;
+
+    for (const title of queries) {
+      try {
+        const search = await youtube.search.list({
+          part: ['id', 'snippet'],
+          maxResults: 1,
+          q: title,
+          type: ['video'],
+        });
+
+        const videoId = search.data.items?.[0]?.id?.videoId;
+        if (!videoId) {
+          failed++;
+          continue;
         }
+
+        await youtube.playlistItems.insert({
+          part: ['id', 'snippet'],
+          requestBody: {
+            snippet: {
+              playlistId: playlistId,
+              resourceId: { kind: 'youtube#video', videoId: videoId },
+            },
+          },
+        });
+        added++;
+      } catch (err) {
+        console.error(`Failed to add "${title}":`, err.message);
+        failed++;
+      }
     }
-}, async function (err, data, response) {
 
-          if (err) {
-             console.log('Error: ' + err);
-          }
-          if (data) {
-              let playlistId = await (data.data.id);
-
-              for(let i =0 ; i < namearr.length; i++){
-                var title = await namearr[i];
-                
-                youtube.search.list({
-                  part: 'id,snippet',
-                  maxResults : 1,
-                  q : title 
-                },
-                    async function (err, data) {
-                    if (err) {
-                      console.error('Error: ' + err);
-                    }
-                    if (data) { 
-                       let videoId = await (data.data.items[0].id.videoId);
-
-                         youtube.playlistItems.insert({
-                          part :"id,snippet",
-                          resource:{
-                                  snippet: {
-                                    playlistId: playlistId, 
-                                     resourceId: {
-                                            kind: 'youtube#video',
-                                            videoId: videoId
-                                      }
-                                  }
-                          }
-                         
-                       }); 
-                    
-                       
-                      
-                    }   
-                     
-          })
-          await sleep(5000);  }
-             
-          }
-        
-        })
-        function sleep(ms) {
-          return new Promise((resolve) => {
-            setTimeout(resolve, ms);
-          });
-        } 
+    res.json({
+      success: true,
+      playlistId,
+      tracksRequested: queries.length,
+      added,
+      failed,
+    });
+  } catch (error) {
+    console.error('Conversion failed:', error.message);
+    res.status(500).json({ success: false, error: error.message });
+  }
 });
 
-
-console.log('Listening on 8888');
-app.listen(8888);
-
+const PORT = process.env.PORT || 8888;
+app.listen(PORT, () => console.log(`Listening on ${PORT}`));
