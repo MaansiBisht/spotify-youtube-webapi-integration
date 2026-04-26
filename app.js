@@ -9,8 +9,21 @@ const path = require('path');
 const { google } = require('googleapis');
 const readJson = require('r-json');
 const SpotifyWebApi = require('spotify-web-api-node');
+const YTMusic = require('ytmusic-api');
 
 const spotifyApi = new SpotifyWebApi();
+
+// Lazy single-instance YT Music client. initialize() fetches music.youtube.com
+// cookies/headers once; we cache the resolved instance for the process lifetime
+// so subsequent searches reuse it.
+let ytmusicPromise = null;
+function getYTMusic() {
+  if (!ytmusicPromise) {
+    const ytmusic = new YTMusic();
+    ytmusicPromise = ytmusic.initialize().then(() => ytmusic);
+  }
+  return ytmusicPromise;
+}
 
 //---------------------------SPOTIFY AUTH-----------------------//
 
@@ -242,16 +255,14 @@ app.get('/convert/:playlisturl', async function (req, res) {
     let added = 0;
     let failed = 0;
 
+    const ytm = await getYTMusic();
+
     for (const title of queries) {
       try {
-        const search = await youtube.search.list({
-          part: ['id', 'snippet'],
-          maxResults: 1,
-          q: title,
-          type: ['video'],
-        });
-
-        const videoId = search.data.items?.[0]?.id?.videoId;
+        // Search YT Music (unofficial, no Data API quota) instead of
+        // youtube.search.list (100 quota units per call).
+        const songs = await ytm.searchSongs(title);
+        const videoId = songs?.[0]?.videoId;
         if (!videoId) {
           failed++;
           continue;

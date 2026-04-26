@@ -16,6 +16,7 @@
     "express": "^4.21.1",
     "googleapis": "^144.0.0",
     "r-json": "^1.2.10",
-    "spotify-web-api-node": "^5.0.2"
+    "spotify-web-api-node": "^5.0.2",
+    "ytmusic-api": "^5.3.1"
   }
 }
